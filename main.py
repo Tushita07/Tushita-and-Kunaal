@@ -4,6 +4,8 @@
 # Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
 
 from neural import NeuralNet
+import pandas as pd
+from sklearn import preprocessing
 
 # each row is an (input, output) tuple
 xor_data = [
@@ -14,19 +16,58 @@ xor_data = [
     ([1.0, 1.0],  [0.0])   #[1, 0] => 0
 ]
 
-
-nn = NeuralNet(2, 5, 1)
-nn.train(xor_data)
-
 def print_hi(name):
     # Use a breakpoint in the code line below to debug your script.
     print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
 
+def read_wine_data():
+
+    #names = pd.read_fwf('wine.names')
+    contents = pd.read_csv("wine.data",
+                           names=['winery', 'alcohol', 'malic_acid', 'ash', 'alcalinity_of_ash', 'magnesium',
+                                  'total_phenols', 'flavanoids', 'nonflavanoid_phenols', 'proanthocyanins',
+                                  'color_intensity', 'hue', 'od280/od315_of_diluted_wines', 'proline'])
+    print(contents)
+    return contents
+
+def pre_process(df):
+    result = df.copy()
+    for feature_name in df.columns:
+        max_value = df[feature_name].max()
+        min_value = df[feature_name].min()
+        result[feature_name] = (df[feature_name] - min_value) / (max_value - min_value)
+    print(result)
+    return result
+
+def train_wine_data(data):
+    nn = NeuralNet(13,13,1)
+    nn.train() #
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     #print_hi('PyCharm')
-    nn = NeuralNet(2, 5, 1)
-    nn.train(xor_data)
+
+    data = read_wine_data()
+    proc_data = pre_process(data)
+
+
+    #
+    # nn = NeuralNet(2, 1, 1) #changed to perceptron, 1 node vs. 5
+    # nn.train(xor_data,iters = 2000, print_interval=50)
+    #
+    # print(nn.get_ho_weights())
+    # print(nn.get_ih_weights())
+    #
+    # print()
+    # print('Evaluate [0,1]')
+    # print(nn.evaluate([0.0, 1.0]))
+    #
+    # print()
+    # for triple in nn.test_with_expected(xor_data):
+    #     print(triple)
+    #
+    # print()
+    # for i in nn.test_with_expected(xor_data):
+    #     print(f"desired: {i[1]}, actual: {i[2]}")
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
