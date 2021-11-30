@@ -5,6 +5,7 @@
 
 from neural import NeuralNet
 import pandas as pd
+from sklearn import preprocessing
 
 # each row is an (input, output) tuple
 xor_data = [
@@ -27,12 +28,29 @@ def read_wine_data():
                                   'total_phenols', 'flavanoids', 'nonflavanoid_phenols', 'proanthocyanins',
                                   'color_intensity', 'hue', 'od280/od315_of_diluted_wines', 'proline'])
     print(contents)
+    return contents
+
+def pre_process(df):
+    result = df.copy()
+    for feature_name in df.columns:
+        max_value = df[feature_name].max()
+        min_value = df[feature_name].min()
+        result[feature_name] = (df[feature_name] - min_value) / (max_value - min_value)
+    print(result)
+    return result
+
+def train_wine_data(data):
+    nn = NeuralNet(13,13,1)
+    nn.train() #
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     #print_hi('PyCharm')
 
-    read_wine_data()
+    data = read_wine_data()
+    proc_data = pre_process(data)
+
+
     #
     # nn = NeuralNet(2, 1, 1) #changed to perceptron, 1 node vs. 5
     # nn.train(xor_data,iters = 2000, print_interval=50)
