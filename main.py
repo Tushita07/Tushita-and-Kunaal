@@ -23,10 +23,10 @@ def print_hi(name):
 def read_wine_data():
 
     #names = pd.read_fwf('wine.names')
-    contents = pd.read_csv("wine.data",
-                           names=['winery', 'alcohol', 'malic_acid', 'ash', 'alcalinity_of_ash', 'magnesium',
-                                  'total_phenols', 'flavanoids', 'nonflavanoid_phenols', 'proanthocyanins',
-                                  'color_intensity', 'hue', 'od280/od315_of_diluted_wines', 'proline'])
+    contents = pd.read_csv("wine.data", header = None)
+                           # names=['winery', 'alcohol', 'malic_acid', 'ash', 'alcalinity_of_ash', 'magnesium',
+                           #        'total_phenols', 'flavanoids', 'nonflavanoid_phenols', 'proanthocyanins',
+                           #        'color_intensity', 'hue', 'od280/od315_of_diluted_wines', 'proline'])
     print(contents)
     return contents
 
@@ -36,12 +36,43 @@ def pre_process(df):
         max_value = df[feature_name].max()
         min_value = df[feature_name].min()
         result[feature_name] = (df[feature_name] - min_value) / (max_value - min_value)
-    print(result)
+    #print(result)
+
+
+
     return result
 
-def train_wine_data(data):
-    nn = NeuralNet(13,13,1)
-    nn.train() #
+# def train_wine_data(data):
+#     nn = NeuralNet(13,3,1)
+#
+#     #print(data)
+#     input_data = data.iloc[: ,1:]
+#     input_data_list = input_data.values.tolist()
+#     output_data = data.iloc[: ,0]
+#     output_data_list = output_data.values.tolist()
+#
+#     wine_data = []
+#
+#
+#     for row in range(0, len(input_data_list)):
+#         wine_data.append((input_data_list[row],[output_data_list[row]]))
+#
+#     #print(wine_data[0])
+#
+#     nn.train(wine_data, iters=1000, print_interval=50)
+
+def df_to_list(data):
+    input_data = data.iloc[:, 1:]
+    input_data_list = input_data.values.tolist()
+    output_data = data.iloc[:, 0]
+    output_data_list = output_data.values.tolist()
+
+    wine_data = []
+
+    for row in range(0, len(input_data_list)):
+        wine_data.append((input_data_list[row], [output_data_list[row]]))
+
+    return wine_data
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
@@ -50,6 +81,16 @@ if __name__ == '__main__':
     data = read_wine_data()
     proc_data = pre_process(data)
 
+    train = proc_data.sample(frac = 0.8)
+    test = proc_data.drop(train.index)
+
+    nn = NeuralNet(13, 3, 1)
+    nn.train(df_to_list((train)), iters=10000, print_interval=1000)
+
+    #nn.test_with_expected(df_to_list(test))
+
+    for i in nn.test_with_expected(df_to_list(test)):
+        print(f"desired: {i[1]}, actual: {i[2]}")
 
     #
     # nn = NeuralNet(2, 1, 1) #changed to perceptron, 1 node vs. 5
